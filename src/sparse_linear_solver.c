@@ -6,10 +6,13 @@
 #include "cblas.h"
 #endif
 
+
 double *AllocVector(int n)
 {
     return (double*) malloc (n*sizeof(double));
 }
+
+
 
 void CSRMatVec(csr_t* mat, double *x, double *y)
 {
@@ -20,7 +23,7 @@ void CSRMatVec(csr_t* mat, double *x, double *y)
             int jstart = mat->ia[r];
             int jend   = mat->ia[r+1];
             y[r] = 0.0;
-            // Multiplica por (D+U)
+            // Multiplica (D+U)*x
             for(int j=jstart; j < jend; ++j) {
                 int c = mat->ja[j];
                 y[r] += mat->values[j]*x[c];
@@ -30,7 +33,7 @@ void CSRMatVec(csr_t* mat, double *x, double *y)
         {
             int jstart = mat->ia[r];
             int jend   = mat->ia[r+1];
-            // Multipluca por L
+            // Multiplica (U^T)*x
             for(int j=jstart+1; j < jend; ++j) {
                 int c = mat->ja[j];
                 y[c] += mat->values[j]*x[r];
@@ -89,7 +92,7 @@ void copy(int n, double *vo, double* vd)
 #endif
 }
 
-void scal(int n, double a, double *v)
+void scal(int n, double *v, double a)
 {
 #if defined(HAVE_CBLAS)
     cblas_dscal(n,a,v,1);
@@ -100,7 +103,7 @@ void scal(int n, double a, double *v)
 #endif
 }
 
-void set(int n, double a, double *v)
+void set(int n, double *v, double a)
 {
     #pragma omp simd 
     for(int i = 0; i < n; i++)
@@ -156,7 +159,7 @@ void GradientConjugate(csr_t* A, double* b, double *x, double toler, int maxIter
 
         //p    = r + beta*p
 
-        scal(n,beta,p);
+        scal(n,p,beta);
         axpy(n,1.0,r,p);
 
         rdot_old = rdot_new;
@@ -266,7 +269,7 @@ void GradientConjugatePrecond(csr_t* A, double* b, double *x, double toler, int 
         beta = rdot_new/rdot_old;
 
         //p    = r + beta*p
-        scal(n,beta,p);
+        scal(n,p, beta);
         axpy(n,1.0,z,p);
 
         rdot_old = rdot_new;

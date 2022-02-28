@@ -107,6 +107,7 @@ csr_t* crd2csr(crd_t* data)
 
     for(int i =0; i <= sparse->nrows; ++i)
         sparse->ia[i] = 0;
+
     // zerar nnz_per_row;
     for(int i =0; i < sparse->nrows; i++)
         nnz_per_row[i] = 0;
@@ -123,7 +124,8 @@ csr_t* crd2csr(crd_t* data)
             nnz_total++;
         } else
         {
-                
+            // formato CRD salva por coluna aa matriz triangular superior
+            // no CSR devemos salvar a transposta (por linha)    
             nnz_per_row[j]++;
             nnz_total++;
         }

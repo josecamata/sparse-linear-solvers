@@ -1,8 +1,8 @@
 /*
-    Programa para demonstrar a método
+    Programa para demonstrar  método
     do gradiente conjugado
 
-    Autor: Jose Camata
+    Autor: Prof. Jose Camata
     E-mail: camata@ice.ufjf.br 
 
 */
@@ -23,6 +23,7 @@ void show_help(char *name) {
     [uso] %s <opcoes>\n\
             -h                   mostra essa tela e sai.\n\
             -m [ARQUIVO .mtx]    arquivo Matrix Market  .\n\
+            -t [tolerancia]      numero real que indica a precisao no GC\n\
             -v                   Imprime saida completa .\n", name) ;
     exit(-1) ;
 }
@@ -40,6 +41,7 @@ int main(int argc, char *argv[])
      /* Variáveis que receberão os argumentos
      * das opções. */
     char *file=NULL;
+    double tolerance = 1.0E-06;
     short flag=0;
     verbose_mode_t  verbose_mode = VERBOSE_OFF;
 
@@ -48,18 +50,22 @@ int main(int argc, char *argv[])
 
     /* getopt() retorna o caractere de uma opção a cada
      * iteração e -1 para marcar o fim do processo. */
-    while( (opt = getopt(argc, argv, "hvm:")) > 0 ) {
+    while( (opt = getopt(argc, argv, "hvm:t:")) > 0 ) {
         switch ( opt ) {
             case 'h': /* help */
                 show_help(argv[0]) ;
                 break ;
             case 'm': /* opção -m */
-                file = optarg ; // optarg é uma variavel que aponta para o nome do arquivo
+                file = optarg ; // optarg é uma variavel global definida pelo getpot
                 flag =1;
                 break ;
             case 'v': /* opção -v */
                 verbose_mode = VERBOSE_ON;
                 break ;
+                case 't':
+                tolerance = atof(optarg);
+                if(tolerance == 0.0) tolerance = 1.0E-06;
+                break;
             default:
                 fprintf(stderr, "Opcao invalida ou faltando argumento: `%c'\n", opt) ;
                 return -1 ;
@@ -107,18 +113,18 @@ int main(int argc, char *argv[])
 
         // Solução Exata
         // u = 1.0;
-        set(n,1.0,u);
+        set(n,u,1.0);
         
         // Solução aproximada inicial
         // x = 0.0
-        set(n,0.0,x);
+        set(n,x,0.0);
 
         // Lado direito é obtido multiplicado A pela solução exata u
         // b = A*u;
         CSRMatVec(A,u,b);
 
         // Resolve o sistema Ax = b usando o método do Gradiente Conjugado
-        GradientConjugate(A,b,x,1.0E-6,n,verbose_mode);
+        GradientConjugate(A,b,x,tolerance,n,verbose_mode);
 
         // Verifica a solução x tem que ser aproximadamente igual a u
         copy(n,u,e);
@@ -128,11 +134,11 @@ int main(int argc, char *argv[])
    
         // Reescreve solução aproximada inicial
         // x = 0.0
-        set(n,0.0,x);
+        set(n,x,0.0);
 
         // Resolve o sistema Ax = b usando o método do 
         // Gradiente Conjugado com precondicionador Jacobi
-        GradientConjugatePrecond(A,b,x,1.0E-6,n,verbose_mode);
+        GradientConjugatePrecond(A,b,x,tolerance,n,verbose_mode);
 
         // Verifica a solução
         copy(n,u,e);
