@@ -57,6 +57,7 @@ double dot_produt(int n, double *v1, double *v2)
     return cblas_ddot(n,v1,1,v2,1);
 #else
     double r = 0.0;
+    #pragma omp simd reduction(+:r)
     for(int i = 0; i < n; i++)
         r += v1[i]*v2[i];
     return r;
@@ -69,9 +70,10 @@ void axpy(int n, double a, double *x, double *y)
 #if defined(HAVE_CBLAS)
     cblas_daxpy(n,a,x,1,y,1);
 #else
+    #pragma omp simd 
     for(int i = 0; i < n; i++)
     {
-        y[i]+= a*x[i];
+        y[i] = y[i] +  a*x[i];
     }
 #endif
 }
@@ -81,6 +83,7 @@ void copy(int n, double *vo, double* vd)
 #if defined(HAVE_CBLAS)
     cblas_dcopy(n,vo,1,vd,1);
 #else
+    #pragma omp simd 
     for(int i = 0; i < n; i++)
         vd[i] = vo[i];
 #endif
@@ -91,6 +94,7 @@ void scal(int n, double a, double *v)
 #if defined(HAVE_CBLAS)
     cblas_dscal(n,a,v,1);
 #else
+    #pragma omp simd 
     for(int i = 0; i < n; i++)
          v[i] = a*v[i];
 #endif
@@ -98,6 +102,7 @@ void scal(int n, double a, double *v)
 
 void set(int n, double a, double *v)
 {
+    #pragma omp simd 
     for(int i = 0; i < n; i++)
         v[i] = a;
 

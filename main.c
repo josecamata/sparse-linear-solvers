@@ -27,6 +27,9 @@ void show_help(char *name) {
     exit(-1) ;
 }
 
+// Define um enumerador para listar as opções de impressão na tela
+// VERBOSE_OFF: imprime informação basica
+// VERBOSE_ON: Imprime o residuo por iteração
 typedef enum {VERBOSE_OFF=0, VERBOSE_ON=1} verbose_mode_t;
 
 int main(int argc, char *argv[])
@@ -51,7 +54,7 @@ int main(int argc, char *argv[])
                 show_help(argv[0]) ;
                 break ;
             case 'm': /* opção -m */
-                file = optarg ;
+                file = optarg ; // optarg é uma variavel que aponta para o nome do arquivo
                 flag =1;
                 break ;
             case 'v': /* opção -v */
@@ -110,23 +113,28 @@ int main(int argc, char *argv[])
         // x = 0.0
         set(n,0.0,x);
 
-        // Lado direito
+        // Lado direito é obtido multiplicado A pela solução exata u
         // b = A*u;
         CSRMatVec(A,u,b);
 
+        // Resolve o sistema Ax = b usando o método do Gradiente Conjugado
         GradientConjugate(A,b,x,1.0E-6,n,verbose_mode);
 
-        // check solution:
+        // Verifica a solução x tem que ser aproximadamente igual a u
         copy(n,u,e);
         axpy(n,-1.0,x,e);
         printf("|U_exato - U_aprox| = %e\n" , sqrt(dot_produt(n,e,e)));
 
    
+        // Reescreve solução aproximada inicial
+        // x = 0.0
         set(n,0.0,x);
 
+        // Resolve o sistema Ax = b usando o método do 
+        // Gradiente Conjugado com precondicionador Jacobi
         GradientConjugatePrecond(A,b,x,1.0E-6,n,verbose_mode);
 
-        // check solution:
+        // Verifica a solução
         copy(n,u,e);
         axpy(n,-1.0,x,e);
         printf("|U_exato - U_aprox| = %e\n" , sqrt(dot_produt(n,e,e)));
