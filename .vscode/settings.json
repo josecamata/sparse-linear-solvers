@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "sparse_structs.h": "c",
+        "sparse_linear_solver.h": "c"
+    }
+}
