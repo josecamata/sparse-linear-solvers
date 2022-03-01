@@ -1,3 +1,3 @@
 # Computação Científica
-## Métodos de solução de sistema lineares 
+## Métodos de Solução de Sistema Lineares 
 ### Gradiente Conjugado
